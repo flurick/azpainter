@@ -1,4 +1,4 @@
-AM_CPPFLAGS=-I../mlib/include -Iinclude -I@freetype_dir@ -DPACKAGE_DATA_DIR=\""$(datadir)/azpainter"\"
+AM_CPPFLAGS="-I@top_srcdir@/mlib/include" "-I@top_srcdir@/src/include" -I@freetype_dir@ -DPACKAGE_DATA_DIR=\""$(datadir)/azpainter"\"
 AM_CFLAGS=-pthread
 
 bin_PROGRAMS=azpainter

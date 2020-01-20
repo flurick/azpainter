@@ -1,4 +1,4 @@
-AM_CPPFLAGS=-Iinclude -Isrc/private -I@freetype_dir@
+AM_CPPFLAGS="-I@top_srcdir@/mlib/include" "-I@top_srcdir@/mlib/src/private" -I@freetype_dir@
 AM_CFLAGS=-pthread
 
 noinst_LIBRARIES=libmlib.a
