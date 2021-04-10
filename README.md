@@ -6,6 +6,7 @@
 ## Website
 
 Official Website: http://azsky2.html.xdomain.jp/soft/azpainter.html (Japanese)
+https://translate.google.com/translate?sl=auto&tl=en&u=http://azsky2.html.xdomain.jp/
 
 Other:
 
