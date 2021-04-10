@@ -56,6 +56,11 @@ struct _DrawFont
 	uint32_t fLoadGlyph_default;
 };
 
+typedef struct
+{
+	int left,top,advance;
+}_glyph_drawmt;
+
 //----------------
 
 static FT_Library g_ftlib = NULL;
@@ -67,8 +72,8 @@ enum
 	GETGLYPH_F_VERT = 1<<0,
 };
 
-static FT_BitmapGlyph _getBitmapGlyph(FT_Library lib,DrawFont *p,uint32_t code,int flags);
-static void _drawChar(DrawFont *p,FT_BitmapGlyph glyph,int x,int y,DrawFontInfo *info);
+static mBool _getBitmapGlyph(FT_Library lib,DrawFont *p,uint32_t code,int flags,_glyph_drawmt *drawmt);
+static void _drawChar(DrawFont *p,int x,int y,DrawFontInfo *info);
 
 //----------------
 
@@ -84,7 +89,6 @@ static void _drawChar(DrawFont *p,FT_BitmapGlyph glyph,int x,int y,DrawFontInfo 
 static void _setFontData(DrawFont *p,FT_Face face)
 {
 	void *gsub;
-	FT_BitmapGlyph glyph;
 	mFreeTypeMetricsInfo metrics;
 
 	//縦書き情報があるか
@@ -108,19 +112,17 @@ static void _setFontData(DrawFont *p,FT_Face face)
 
 	p->baseline   = metrics.baseline;
 	p->horzHeight = metrics.height;
+	p->vertHeight = face->size->metrics.y_ppem;
+}
 
-	//縦書きの文字高さ (グリフを取得して調べる)
+/** 26:6 の固定小数点数を丸めて整数値へ */
 
-	if(p->has_vert)
-	{
-		glyph = _getBitmapGlyph(g_ftlib, p, L'あ', GETGLYPH_F_VERT);
-
-		if(glyph)
-			p->vertHeight = glyph->root.advance.x >> 16;
-	}
-
-	if(p->vertHeight == 0)
-		p->vertHeight = p->horzHeight;
+int _round_fix6(int32_t n)
+{
+	if(n >= 0)
+		return (n + 32) >> 6;
+	else
+		return (n - 32) >> 6;
 }
 
 
@@ -250,7 +252,7 @@ void DrawFont_setHinting(DrawFont *p,int type)
 
 void DrawFont_drawText(DrawFont *p,int x,int y,const char *text,DrawFontInfo *info)
 {
-	FT_BitmapGlyph glyph;
+	_glyph_drawmt dmt;
 	uint32_t ucs;
 	int ret,xx,yy,daku_y,daku_x;
 	uint8_t daku_type,daku_have_left = 0;
@@ -301,32 +303,33 @@ void DrawFont_drawText(DrawFont *p,int x,int y,const char *text,DrawFontInfo *in
 
 					if(daku_have_left)
 					{
-						glyph = _getBitmapGlyph(g_ftlib, p, ucs,
-							(daku_type == DRAWFONT_DAKUTEN_REPLACE_HORZ)? 0: GETGLYPH_F_VERT);
-						if(!glyph) continue;
+						if(_getBitmapGlyph(g_ftlib, p, ucs,
+							(daku_type == DRAWFONT_DAKUTEN_REPLACE_HORZ)? 0: GETGLYPH_F_VERT, &dmt))
+						{
+							_drawChar(p, daku_x + dmt.left, daku_y + dmt.top, info);
 
-						_drawChar(p, glyph, daku_x + glyph->left, daku_y - glyph->top, info);
-
-						daku_have_left = 0;
+							daku_have_left = 0;
+						}
 					}
 				}
 				else
 				{
 					//通常
 										
-					glyph = _getBitmapGlyph(g_ftlib, p, ucs, GETGLYPH_F_VERT);
-					if(!glyph) continue;
+					if(_getBitmapGlyph(g_ftlib, p, ucs, GETGLYPH_F_VERT, &dmt))
+					{
+						_drawChar(p, xx + dmt.left, yy + dmt.top, info);
 
-					_drawChar(p, glyph, xx + glyph->left, yy - glyph->top, info);
+						daku_have_left = 1;
+						daku_x = xx;
+						daku_y = yy;
 
-					daku_have_left = 1;
-					daku_x = xx;
-					daku_y = yy;
-
-					if(daku_type == DRAWFONT_DAKUTEN_REPLACE_HORZ)
-						daku_x += glyph->root.advance.x >> 16;
-					
-					yy += p->vertHeight + info->char_space;
+						if(daku_type == DRAWFONT_DAKUTEN_REPLACE_HORZ)
+							daku_x += p->face->size->metrics.y_ppem;
+						
+						if(dmt.advance)
+							yy += dmt.advance + info->char_space;
+					}
 				}
 			}
 		}
@@ -363,8 +366,8 @@ void DrawFont_drawText(DrawFont *p,int x,int y,const char *text,DrawFontInfo *in
 
 				//
 
-				glyph = _getBitmapGlyph(g_ftlib, p, ucs, 0);
-				if(!glyph) continue;
+				if(!_getBitmapGlyph(g_ftlib, p, ucs, 0, &dmt))
+					continue;
 				
 				if((ucs == 0x3099 || ucs == 0x309A) && daku_type)
 				{
@@ -372,7 +375,7 @@ void DrawFont_drawText(DrawFont *p,int x,int y,const char *text,DrawFontInfo *in
 
 					if(daku_have_left)
 					{
-						_drawChar(p, glyph, daku_x + glyph->left, daku_y - glyph->top, info);
+						_drawChar(p, daku_x + dmt.left, daku_y + dmt.top, info);
 
 						daku_have_left = 0;
 					}
@@ -381,13 +384,15 @@ void DrawFont_drawText(DrawFont *p,int x,int y,const char *text,DrawFontInfo *in
 				{
 					//通常
 					
-					_drawChar(p, glyph, xx + glyph->left, yy - glyph->top, info);
+					_drawChar(p, xx + dmt.left, yy + dmt.top, info);
 
 					daku_have_left = 1;
 					daku_x = xx;
 					daku_y = yy;
 					
-					xx += (glyph->root.advance.x >> 16) + info->char_space;
+					//送り幅が0なら、字間は加算しない
+					if(dmt.advance)
+						xx += dmt.advance + info->char_space;
 				}
 			}
 		}
@@ -400,22 +405,20 @@ void DrawFont_drawText(DrawFont *p,int x,int y,const char *text,DrawFontInfo *in
 //=================================
 
 
-/** 文字コードからビットマップグリフ取得
- *
- * @return NULL で失敗 */
+/** 文字コードからビットマップグリフ取得 */
 
-FT_BitmapGlyph _getBitmapGlyph(FT_Library lib,DrawFont *p,uint32_t code,int flags)
+mBool _getBitmapGlyph(FT_Library lib,DrawFont *p,uint32_t code,int flags,
+	_glyph_drawmt *drawmt)
 {
 	FT_Face face = p->face;
 	mFreeTypeInfo *info = &p->info;
 	FT_UInt gindex;
-	FT_Glyph glyph;
 	uint32_t loadflags;
 	
 	//コードからグリフインデックス取得
 	
 	gindex = FT_Get_Char_Index(face, code);
-	if(gindex == 0) return NULL;
+	if(gindex == 0) return FALSE;
 
 	//縦書きグリフに置換
 
@@ -429,59 +432,70 @@ FT_BitmapGlyph _getBitmapGlyph(FT_Library lib,DrawFont *p,uint32_t code,int flag
 	if((flags & GETGLYPH_F_VERT) && p->has_vert)
 		loadflags |= FT_LOAD_VERTICAL_LAYOUT;
 	
-	if(FT_Load_Glyph(face, gindex, info->fLoadGlyph))
-		return NULL;
-	
-	//グリフのコピー取得
-	
-	if(FT_Get_Glyph(face->glyph, &glyph))
-		return NULL;
-	
-	//太字変換
-	
-	if(info->flags & MFTINFO_F_EMBOLDEN)
-	{
-		if(glyph->format == FT_GLYPH_FORMAT_OUTLINE)
-			//アウトライン
-			FT_Outline_Embolden(&((FT_OutlineGlyph)glyph)->outline, 1<<6);
-		else if(glyph->format == FT_GLYPH_FORMAT_BITMAP)
-			//ビットマップ
-			FT_Bitmap_Embolden(lib, &((FT_BitmapGlyph)glyph)->bitmap, 1<<6, 0);
-	}
+	if(FT_Load_Glyph(face, gindex, loadflags))
+		return FALSE;
 
-	//matrix
+	//
 
-	if(glyph->format == FT_GLYPH_FORMAT_OUTLINE)
+	if(face->glyph->format == FT_GLYPH_FORMAT_OUTLINE)
 	{
+		//------ アウトライン
+
+		//太字化
+
+		if(info->flags & MFTINFO_F_EMBOLDEN)
+			FT_Outline_Embolden(&face->glyph->outline, 1<<6);
+
 		//斜体
 		
 		if(info->flags & MFTINFO_F_MATRIX)
-			FT_Outline_Transform(&((FT_OutlineGlyph)glyph)->outline, &info->matrix);
+			FT_Outline_Transform(&face->glyph->outline, &info->matrix);
+
+		//ビットマップに変換
+
+		if(FT_Render_Glyph(face->glyph, info->nRenderMode))
+			return FALSE;
 	}
-	
-	//ビットマップに変換
-	
-	if(glyph->format != FT_GLYPH_FORMAT_BITMAP)
+	else
 	{
-		if(FT_Glyph_To_Bitmap(&glyph, info->nRenderMode, NULL, TRUE))
+		//------ ビットマップ
+
+		//太字化
+
+		if(info->flags & MFTINFO_F_EMBOLDEN)
 		{
-			FT_Done_Glyph(glyph);
-			return NULL;
+			FT_GlyphSlot_Own_Bitmap(face->glyph);
+			FT_Bitmap_Embolden(g_ftlib, &face->glyph->bitmap, 1<<6, 0);
 		}
 	}
 
-	return (FT_BitmapGlyph)glyph;
+	//
+
+	drawmt->left = face->glyph->bitmap_left;
+	drawmt->top = -(face->glyph->bitmap_top);
+
+	if(!(flags & GETGLYPH_F_VERT))
+		//横書き
+		drawmt->advance = _round_fix6(face->glyph->advance.x);
+	else if(p->has_vert)
+		//縦書き:フォントに縦書きレイアウトあり
+		drawmt->advance = _round_fix6(face->glyph->advance.y);
+	else
+		//縦書き:縦書きレイアウトなし -> 全角幅
+		drawmt->advance = face->size->metrics.y_ppem;
+
+	return TRUE;
 }
 
 /** 1文字描画 */
 
-void _drawChar(DrawFont *p,FT_BitmapGlyph glyph,int x,int y,DrawFontInfo *info)
+void _drawChar(DrawFont *p,int x,int y,DrawFontInfo *info)
 {
 	FT_Bitmap *bm;
 	uint8_t *pbuf,*pb;
 	int ix,iy,w,h,pitch,f;
 
-	bm = &glyph->bitmap;
+	bm = &p->face->glyph->bitmap;;
 	
 	w = bm->width;
 	h = bm->rows;

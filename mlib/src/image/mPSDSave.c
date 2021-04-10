@@ -103,8 +103,7 @@ static void _write_outbuf(mPSDSave *p)
 
 static int _packbits_write(mPSDSave *p,uint8_t type,uint8_t *buf,int cnt)
 {
-	char len;
-	int size;
+	int size,len;
 	uint8_t *pd;
 
 	//長さ
@@ -125,7 +124,7 @@ static int _packbits_write(mPSDSave *p,uint8_t type,uint8_t *buf,int cnt)
 
 	pd = p->outbuf + p->outsize;
 
-	*((char *)pd) = len;
+	*pd = (uint8_t)len;
 
 	if(type)
 		pd[1] = *buf;

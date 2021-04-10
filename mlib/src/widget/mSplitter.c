@@ -82,6 +82,7 @@ param1 : 前のウィジェットの増減サイズ。
 static int _callback_gettarget_default(mSplitter *p,mSplitterTargetInfo *info)
 {
 	mWidget *prev,*next;
+	int vert;
 
 	prev = p->wg.prev;
 	next = p->wg.next;
@@ -95,18 +96,23 @@ static int _callback_gettarget_default(mSplitter *p,mSplitterTargetInfo *info)
 	info->wgprev = prev;
 	info->wgnext = next;
 
-	if(_IS_VERT(p))
-	{
-		info->prev_cur = prev->h;
-		info->next_cur = next->h;
-	}
-	else
-	{
-		info->prev_cur = prev->w;
-		info->next_cur = next->w;
-	}
+	//現在のサイズ
 
-	info->prev_min = info->prev_max = 0;
+	vert = _IS_VERT(p);
+
+	if(mWidgetIsVisible(prev))
+		info->prev_cur = (vert)? prev->h: prev->w;
+	else
+		info->prev_cur = 0;
+
+	if(mWidgetIsVisible(next))
+		info->next_cur = (vert)? next->h: next->w;
+	else
+		info->next_cur = 0;
+
+	//
+
+	info->prev_min = info->next_min = 0;
 	info->prev_max = info->next_max = info->prev_cur + info->next_cur;
 
 	return 1;

@@ -451,7 +451,7 @@ mBool FilterDraw_sobel(FilterDrawInfo *info)
 	double dx[3],dy[3],d;
 	RGBAFix15 pix,pix2;
 	TileImageSetPixelFunc setpix;
-	char hmask[9] = {-1,-2,-1, 0,0,0, 1,2,1},
+	int8_t hmask[9] = {-1,-2,-1, 0,0,0, 1,2,1},
 		vmask[9] = {-1,0,1, -2,0,2, -1,0,1};
 
 	FilterSub_getPixelFunc(&setpix);
@@ -579,10 +579,9 @@ mBool FilterDraw_lumtoAlpha(FilterDrawInfo *info)
 mBool FilterDraw_dot_thinning(FilterDrawInfo *info)
 {
 	TileImage *img = info->imgdst;
-	int ix,iy,jx,jy,n,pos,flag;
+	int ix,iy,jx,jy,n,pos,flag,erasex,erasey;;
 	RGBAFix15 pixtp,pix;
 	uint8_t c[25];
-	char erasex,erasey;
 
 	pixtp.v64 = 0;
 

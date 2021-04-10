@@ -114,15 +114,16 @@ static int _amask_event_handle(mWidget *wg,mEvent *ev)
 	int amask;
 
 	if(ev->type == MEVENT_POINTER
-		&& ev->pt.type == MEVENT_POINTER_TYPE_PRESS)
+		&& (ev->pt.type == MEVENT_POINTER_TYPE_PRESS
+			|| ev->pt.type == MEVENT_POINTER_TYPE_DBLCLK))
 	{
 		if(ev->pt.btt == M_BTT_RIGHT
 			|| (ev->pt.btt == M_BTT_LEFT && (ev->pt.state & M_MODS_CTRL)))
 			//右クリック or Ctrl+左 => OFF
 			amask = 0;
 		else if(ev->pt.btt == M_BTT_LEFT && (ev->pt.state & M_MODS_SHIFT))
-			//Shift+左 => アルファマスク
-			amask = 1;
+			//Shift+左 => アルファマスクON/OFF
+			amask = (APP_DRAW->curlayer->alphamask == 1)? 0: 1;
 		else if(ev->pt.btt == M_BTT_LEFT)
 			//左クリック => メニュー
 			amask = _amask_run_menu(wg);

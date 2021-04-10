@@ -74,7 +74,7 @@ int UndoByteEncode(uint8_t *dst,uint8_t *src,int srcsize)
 
 			if(encsize + 2 >= srcsize) return srcsize;
 
-			*dst = (char)(-(ps - ptop) + 1);
+			*dst = (uint8_t)(-(ps - ptop) + 1);
 			dst[1] = val;
 
 			dst += 2;
@@ -90,15 +90,14 @@ int UndoByteEncode(uint8_t *dst,uint8_t *src,int srcsize)
 void UndoByteDecode(uint8_t *dst,uint8_t *src,int srcsize)
 {
 	uint8_t *ps,*psend;
-	int len;
-	signed char lenb;
+	int len,lenb;
 
 	ps = src;
 	psend = src + srcsize;
 
 	while(ps < psend)
 	{
-		lenb = *((char *)ps);
+		lenb = *((int8_t *)ps);
 		ps++;
 
 		if(lenb >= 0)
@@ -175,7 +174,7 @@ int UndoWordEncode(uint8_t *dst,uint8_t *src,int srcsize)
 
 			if(encsize + 3 >= srcsize) return srcsize;
 
-			*dst = (char)(-(ps - ptop) + 1);
+			*dst = (uint8_t)(-(ps - ptop) + 1);
 			*((uint16_t *)(dst + 1)) = val;
 
 			dst += 3;
@@ -192,8 +191,7 @@ int UndoWordDecode(uint8_t *dst,uint8_t *src,int srcsize)
 {
 	uint8_t *ps,*psend;
 	uint16_t *pd,val;
-	int len,size;
-	signed char lenb;
+	int len,size,lenb;
 
 	pd = (uint16_t *)dst;
 	ps = src;
@@ -201,7 +199,7 @@ int UndoWordDecode(uint8_t *dst,uint8_t *src,int srcsize)
 
 	while(ps < psend)
 	{
-		lenb = *((char *)ps);
+		lenb = *((int8_t *)ps);
 		ps++;
 
 		if(lenb >= 0)

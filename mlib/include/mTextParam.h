@@ -27,7 +27,7 @@ extern "C" {
 typedef struct _mTextParam mTextParam;
 
 void mTextParamFree(mTextParam *p);
-mTextParam *mTextParamCreate(const char *text,char split,signed char splitparam);
+mTextParam *mTextParamCreate(const char *text,int split,int splitparam);
 
 mBool mTextParamGetInt(mTextParam *p,const char *key,int *dst);
 mBool mTextParamGetInt_range(mTextParam *p,const char *key,int *dst,int min,int max);

@@ -75,7 +75,7 @@ $*/
 
 //----------------------
 
-#define _APP_VERSION_TEXT  "AzPainter ver 2.1.6\n\nCopyright (C) 2013-2020 Azel"
+#define _APP_VERSION_TEXT  "AzPainter ver 2.1.7\n\nCopyright (C) 2013-2020 Azel"
 
 #define _APP_LICENSE_TEXT \
 "AzPainter is free software: you can redistribute it and/or modify\n" \
@@ -415,7 +415,7 @@ void MainWindow_showStart(MainWindow *p)
 
 	StatusBar_setImageInfo();
 
-	//表示
+	//表示 
 
 	box.x = box.y = -1;
 	box.w = 750;

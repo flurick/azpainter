@@ -793,8 +793,7 @@ int mStrSetURIList(mStr *str,const char *uri,mBool localfile)
 
 void mStrSetURLEncode(mStr *str,const char *text)
 {
-	char flag,m[6];
-	signed char c;
+	char c,flag,m[6];
 	
 	mStrEmpty(str);
 
@@ -804,9 +803,7 @@ void mStrSetURLEncode(mStr *str,const char *text)
 	{
 		//flag = [0] %XX [1] そのまま
 
-		if(c < 0)
-			flag = 0;
-		else if(c == '-' || c == '.' || c == '_' || c == '~' || c == '/' || isalnum(c))
+		if(c == '-' || c == '.' || c == '_' || c == '~' || c == '/' || isalnum(c))
 			flag = 1;
 		else
 			flag = 0;

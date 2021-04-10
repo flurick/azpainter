@@ -795,34 +795,35 @@ static int _move_cur_dir(mEditTextBuf *p,uint32_t key,int select)
 
 /** 先頭へ移動 */
 
-static void _move_cur_home(mEditTextBuf *p)
+static void _move_cur_home(mEditTextBuf *p,int select)
 {
+	int pos;
+
 	if(!p->bMulti)
-		p->curPos = 0;
+		pos = 0;
 	else
 	{
 		//複数行時は行の先頭
 
 		uint32_t *pc = p->text + p->curPos;
-		int pos = p->curPos;
 
-		for(; pos > 0; pos--, pc--)
+		for(pos = p->curPos; pos > 0; pos--, pc--)
 		{
 			if(pc[-1] == '\n') break;
 		}
-
-		p->curPos = pos;
-
-		_calcCursorPos_forMulti(p);
 	}
+
+	mEditTextBuf_moveCursorPos(p, pos, select);
 }
 
 /** 終端へ移動 */
 
-static void _move_cur_end(mEditTextBuf *p)
+static void _move_cur_end(mEditTextBuf *p,int select)
 {
+	int pos;
+
 	if(!p->bMulti)
-		p->curPos = p->textLen;
+		pos = p->textLen;
 	else
 	{
 		//複数行時は行の終端
@@ -831,10 +832,10 @@ static void _move_cur_end(mEditTextBuf *p)
 
 		for(; *pc && *pc != '\n'; pc++);
 		
-		p->curPos = pc - p->text;
-
-		_calcCursorPos_forMulti(p);
+		pos = pc - p->text;
 	}
+
+	mEditTextBuf_moveCursorPos(p, pos, select);
 }
 
 /** バックスペース/削除 */
@@ -917,12 +918,12 @@ int mEditTextBuf_keyProc(mEditTextBuf *p,uint32_t key,uint32_t state,int editok)
 			break;
 		//HOME
 		case MKEY_HOME:
-			_move_cur_home(p);
+			_move_cur_home(p, state & M_MODS_SHIFT);
 			ret = MEDITTEXTBUF_KEYPROC_CURSOR;
 			break;
 		//END
 		case MKEY_END:
-			_move_cur_end(p);
+			_move_cur_end(p, state & M_MODS_SHIFT);
 			ret = MEDITTEXTBUF_KEYPROC_CURSOR;
 			break;
 		//Ctrl+V

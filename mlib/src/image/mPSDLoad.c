@@ -167,7 +167,7 @@ static int _read_packbits(_psdload *p,uint8_t *dstbuf,int rawsize,int encsize)
 
 		if(!_read_inbuf_need(p, 1)) return MPSDLOAD_ERR_CORRUPTED;
 
-		len = *((char *)(inbuf + p->inbuf_pos));
+		len = *((int8_t *)(inbuf + p->inbuf_pos));
 		p->inbuf_pos++;
 
 		//

@@ -188,7 +188,7 @@ void StatusBar_setHelp_tool()
 {
 	StatusBar *p = APP_WIDGETS->statusbar;
 	int no,sub,id = -1;
-	char drawtype[] = {
+	uint8_t drawtype[] = {
 		TRID_LINE45, TRID_DRAWTYPE_BOX, TRID_DRAWTYPE_CIRCLE,
 		TRID_DRAWTYPE_SUCCLINE, TRID_DRAWTYPE_CONCLINE, TRID_DRAWTYPE_BEZIER,
 		TRID_DRAWTYPE_SPLINE

@@ -313,8 +313,7 @@ void DockObjects_all_windowMode(int type)
 
 void DockObject_normalize_layout_config()
 {
-	signed char buf[DOCKWIDGET_NUM + 2];
-	int i,pos,paneno,no;
+	int i,pos,paneno,no,buf[DOCKWIDGET_NUM + 2];
 	char *pc;
 
 	//最後の2つは、ペイン2,3

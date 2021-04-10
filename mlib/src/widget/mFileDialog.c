@@ -638,7 +638,7 @@ static void _end_ok(mFileDialog *p)
 			{
 				if(mMessageBox(M_WINDOW(p), NULL,
 						M_TR_T2(M_TRGROUP_SYS, M_TRSYS_MES_OVERWRITE),
-						MMESBOX_YES | MMESBOX_NO, MMESBOX_NO) == MMESBOX_NO)
+						MMESBOX_YES | MMESBOX_NO, MMESBOX_NO) != MMESBOX_YES)
 				{
 					mStrFree(&str);
 					break;

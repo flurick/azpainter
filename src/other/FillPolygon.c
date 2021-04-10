@@ -36,7 +36,7 @@ $*/
 typedef struct
 {
 	int x;
-	char dir;
+	int8_t dir;
 }EdgeDat;
 
 //処理用データ
@@ -182,7 +182,7 @@ mBool FillPolygon_closePoint(FillPolygon *p)
 
 /** 交点追加 */
 
-static mBool _add_edge(FillPolygon *p,int x,char dir)
+static mBool _add_edge(FillPolygon *p,int x,int dir)
 {
 	EdgeDat dat;
 
@@ -315,9 +315,8 @@ void FillPolygon_getDrawRect(FillPolygon *p,mRect *rc)
 
 mBool FillPolygon_getIntersection_noAA(FillPolygon *p,int yy)
 {
-	int i,x;
+	int i,x,dir;
 	mDoublePoint *ptbuf,*pt1,*pt2;
-	signed char dir;
 	double y;
 
 	//交点クリア
@@ -412,8 +411,7 @@ mBool FillPolygon_getNextLine_noAA(FillPolygon *p,int *x1,int *x2)
 static mBool _get_intersection_aa(FillPolygon *p,double y)
 {
 	mDoublePoint *ptbuf,pt1,pt2,pttmp;
-	int i,x;
-	signed char dir;
+	int i,x,dir;
 
 	//交点クリア
 

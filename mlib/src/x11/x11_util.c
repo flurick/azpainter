@@ -184,76 +184,39 @@ mBool mX11GetProperty32Array(Window id,Atom prop,Atom proptype,void *buf,int num
  * @param proptype 値のタイプ
  * @return 確保したメモリのポインタ (mFree() で解放する) */
 
-void *mX11GetProperty32(Window id,Atom prop,Atom proptype,int *resnum)
+void *mX11GetProperty32(Window id,Atom prop,Atom proptype,int *pnum)
 {
 	Atom type;
-	int ret,format;
-	unsigned long nitems,after,cnt,bufnum;
-	unsigned char *pdat,*buf,*pdst;
+	int format;
+	unsigned long num,after;
+	unsigned char *pdat;
+	void *buf = NULL;
+
+	*pnum = 0;
 
 	if(prop == 0) return NULL;
 
-	//データサイズ取得 : after
+	//ウィンドウの状態が変化した時の値を取得する際などに使われる。
+	//データサイズを確認してから読み込むと、
+	// サイズ確認時と実際の読み込み時で値が変わる場合がある (個数が変化するなど) ため、
+	// 一度の関数で読み込むべきである。
 
-	ret = XGetWindowProperty(XDISP, id, prop, 0, 0,
-			0, proptype, &type, &format, &nitems, &after, &pdat);
-
-	if(pdat) XFree(pdat);
-
-	if(ret != Success || format != 32 || type != proptype || after == 0)
-		return NULL;
-
-	//確保
-	/* [!] 64bit OS 時の注意
-	 * after は (long x データ数) のサイズではなく、(4 x データ数)。
-	 * しかし、実際に取得されるデータは (long x データ数) なので注意。
-	 * X の内部では 4byte データだが、読み込み時には 4byte -> 8byte 変換される。 */
-
-	bufnum = after / 4;
-
-	buf = (unsigned char *)mMalloc(bufnum * sizeof(long), TRUE);
-	if(!buf) return NULL;
-
-	//読み込み
-
-	pdst = buf;
-
-	for(cnt = 0; cnt < bufnum; )
+	if(XGetWindowProperty(XDISP, id, prop, 0, 1024,
+		0, proptype, &type, &format, &num, &after, &pdat) == Success)
 	{
-		ret = XGetWindowProperty(XDISP, id, prop, cnt, bufnum - cnt,
-					0, proptype, &type, &format, &nitems, &after, &pdat);
-
-		if(ret != Success)
+		if(format == 32 && type == proptype && num)
 		{
-			mFree(buf);
-			return NULL;
-		}
+			buf = mMalloc(sizeof(long) * num, FALSE);
+			if(buf)
+				memcpy(buf, pdat, sizeof(long) * num);
 
-		if(nitems)
-		{
-			memcpy(pdst, pdat, nitems * sizeof(long));
-			pdst += nitems * sizeof(long);
-
-			cnt += nitems;
+			*pnum = num;
 		}
 
 		XFree(pdat);
-
-		if(after == 0) break;
 	}
 
-	//実際に読み込んだ数
-
-	if(cnt == 0)
-	{
-		mFree(buf);
-		return NULL;
-	}
-	else
-	{
-		*resnum = cnt;
-		return buf;
-	}
+	return buf;
 }
 
 /** プロパティから format=8 データ取得

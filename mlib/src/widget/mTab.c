@@ -566,7 +566,7 @@ int mTabEventHandle(mWidget *wg,mEvent *ev)
 	{
 		case MEVENT_POINTER:
 			if(ev->pt.type == MEVENT_POINTER_TYPE_PRESS
-				&& ev->pt.type == M_BTT_LEFT)
+				&& ev->pt.btt == M_BTT_LEFT)
 			{
 				//フォーカスセット
 

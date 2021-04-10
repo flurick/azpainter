@@ -119,7 +119,6 @@ void mX11Event_change_NET_WM_STATE(_X11_EVENT *p)
 	
 	patom = (Atom *)mX11GetProperty32(p->xev->xproperty.window,
 				MX11ATOM(NET_WM_STATE), XA_ATOM, &cnt);
-	if(!patom) return;
 
 	//
 	
@@ -132,23 +131,26 @@ void mX11Event_change_NET_WM_STATE(_X11_EVENT *p)
 
 	//fStateReal をセット
 	
-	for(i = 0; i < cnt; i++)
+	if(patom)
 	{
-		if(patom[i] == MX11ATOM(NET_WM_STATE_MAXIMIZED_HORZ))
+		for(i = 0; i < cnt; i++)
 		{
-			sys->fStateReal |= MX11_WIN_STATE_REAL_MAXIMIZED_HORZ;
-			sys->normalH = p->win->wg.h;
+			if(patom[i] == MX11ATOM(NET_WM_STATE_MAXIMIZED_HORZ))
+			{
+				sys->fStateReal |= MX11_WIN_STATE_REAL_MAXIMIZED_HORZ;
+				sys->normalH = p->win->wg.h;
+			}
+			else if(patom[i] == MX11ATOM(NET_WM_STATE_MAXIMIZED_VERT))
+			{
+				sys->fStateReal |= MX11_WIN_STATE_REAL_MAXIMIZED_VERT;
+				sys->normalW = p->win->wg.w;
+			}
+			else if(patom[i] == MX11ATOM(NET_WM_STATE_HIDDEN))
+				sys->fStateReal |= MX11_WIN_STATE_REAL_HIDDEN;
+	
+			else if(patom[i] == MX11ATOM(NET_WM_STATE_ABOVE))
+				sys->fStateReal |= MX11_WIN_STATE_REAL_ABOVE;
 		}
-		else if(patom[i] == MX11ATOM(NET_WM_STATE_MAXIMIZED_VERT))
-		{
-			sys->fStateReal |= MX11_WIN_STATE_REAL_MAXIMIZED_VERT;
-			sys->normalW = p->win->wg.w;
-		}
-		else if(patom[i] == MX11ATOM(NET_WM_STATE_HIDDEN))
-			sys->fStateReal |= MX11_WIN_STATE_REAL_HIDDEN;
-
-		else if(patom[i] == MX11ATOM(NET_WM_STATE_ABOVE))
-			sys->fStateReal |= MX11_WIN_STATE_REAL_ABOVE;
 	}
 	
 	mFree(patom);
