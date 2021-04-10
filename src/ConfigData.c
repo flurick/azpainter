@@ -20,7 +20,8 @@ $*/
 /*****************************************
  * ConfigData 関数
  * 
- * (環境設定関連の処理)
+ * (環境設定関連の処理) 
+ * (Preference-related processing)
  *****************************************/
 
 #include <string.h>
@@ -37,6 +38,7 @@ $*/
 
 
 /** 解放 */
+/** Liberation */
 
 void ConfigData_free()
 {
@@ -69,6 +71,7 @@ void ConfigData_free()
 }
 
 /** ConfigData 作成 */
+/** ConfigData is made */
 
 mBool ConfigData_new()
 {
@@ -85,6 +88,7 @@ mBool ConfigData_new()
 }
 
 /** 作業用ディレクトリのデフォルトパスをセット (ini 読み込み後) */
+/** Set default path to working directory (after reading ini) */
 
 void ConfigData_setTempDir_default()
 {
@@ -101,17 +105,20 @@ void ConfigData_setTempDir_default()
 }
 
 /** 作業用ディレクトリ削除 */
+/** delete working directory */
 
 void ConfigData_deleteTempDir()
 {
 	mDirEntry *dir;
 	mStr str = MSTR_INIT;
 
-	//パスが空ならなし
+	//パスが空ならなし	
+	//None if the path is empty
 
 	if(mStrIsEmpty(&APP_CONF->strTempDirProc)) return;
 
 	//残っているファイルを削除
+	//delete any remaining files
 
 	dir = mDirEntryOpen(APP_CONF->strTempDirProc.buf);
 	if(!dir) return;
@@ -130,6 +137,7 @@ void ConfigData_deleteTempDir()
 	mStrFree(&str);
 
 	//ディレクトリを削除
+	//delete directory
 
 	mDeleteDir(APP_CONF->strTempDirProc.buf);
 }
@@ -137,6 +145,9 @@ void ConfigData_deleteTempDir()
 /** 作業用ディレクトリ作成
  *
  * strTmpDirProc に実際のディレクトリパスセット。 */
+/** Create working directory
+ *
+ * Actual directory path set in strTmpDirProc. * * strTmpDirProc */
 
 void ConfigData_createTempDir()
 {
@@ -144,6 +155,7 @@ void ConfigData_createTempDir()
 	mStr *pstr;
 
 	//パスセット先
+	//path set destination
 
 	pstr = &APP_CONF->strTempDirProc;
 
@@ -157,11 +169,13 @@ void ConfigData_createTempDir()
 	mFree(name);
 
 	//存在していたら削除
+	//Delete if it exists
 
 	if(mIsFileExist(pstr->buf, TRUE))
 		ConfigData_deleteTempDir();
 
 	//作成 (失敗したらパスを空に)
+	//create (empty the path if it fails)
 
 	if(!mCreateDir(pstr->buf))
 		mStrFree(pstr);
@@ -170,6 +184,9 @@ void ConfigData_createTempDir()
 /** 作業用ディレクトリのパス取得
  *
  * @return FALSE でパスなし(作業用ディレクトリなし) */
+/** Get the path to the working directory
+ *
+ * @return FALSE for no path (no working directory) */
 
 mBool ConfigData_getTempPath(mStr *str,const char *add)
 {
@@ -185,6 +202,7 @@ mBool ConfigData_getTempPath(mStr *str,const char *add)
 }
 
 /** 水彩プリセットをデフォルトにセット */
+/** Set watercolour preset as default */
 
 void ConfigData_waterPreset_default()
 {

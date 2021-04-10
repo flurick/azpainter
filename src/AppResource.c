@@ -19,6 +19,7 @@ $*/
 
 /*****************************************
  * アプリリソース関連関数
+ * App resource related functions
  *****************************************/
 
 #include "mDef.h"
@@ -42,6 +43,7 @@ static const uint8_t g_toolbar_btts[] = {
 
 
 /** アイコン用のイメージリスト読み込み */
+/** read image list for icons */
 
 mImageList *AppResource_loadIconImage(const char *filename,int size)
 {
@@ -49,12 +51,14 @@ mImageList *AppResource_loadIconImage(const char *filename,int size)
 	mImageList *img;
 
 	//指定サイズ読み込み
+	//specified size read
 
 	mStrSetFormat(&str, "!/%dx%d/%s", size, size, filename);
 
 	img = mImageListLoadPNG(str.buf, size, 0x00ff00);
 
 	//失敗時は16x16
+	//16x16 in case of failure
 
 	if(!img)
 	{
@@ -69,6 +73,7 @@ mImageList *AppResource_loadIconImage(const char *filename,int size)
 }
 
 /** ツールバーのボタンデータのデフォルト値取得 */
+/** Get default values for toolbar button data */
 
 const uint8_t *AppResource_getToolbarBtt_default()
 {

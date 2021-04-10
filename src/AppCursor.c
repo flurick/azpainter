@@ -21,11 +21,18 @@ $*/
  * AppCursor
  *
  * アプリケーション用カーソル
+ * Cursors for applications
  *****************************************/
 /*
  * - 各スロットに、必要なカーソルを作成してセット。
+ *   For each slot, create and set the required cursor.
  *   同じスロットで同じカーソルが要求された場合は再作成せずに済む。
+ *   If the same cursor is required in the same slot, 
+ *   you don't need to recreate it.
  * - 描画用矢印と砂時計カーソルは頻繁に使うので、初期化時に作成済み。
+ *   The drawing arrow and hourglass cursors are already 
+ *   created at initialisation, as they are used frequently.
+
  */
 
 #include "mDef.h"
@@ -37,6 +44,7 @@ $*/
 //---------------------------
 
 //描画
+//Drawing
 static const unsigned char g_cursor_draw[] = {
 9,12, 0,0,
 0x01, 0x00, 0x03, 0x00, 0x05, 0x00, 0x09, 0x00, 0x11, 0x00, 0x21, 0x00,
@@ -45,6 +53,7 @@ static const unsigned char g_cursor_draw[] = {
 0x7f, 0x00, 0xff, 0x00, 0xff, 0x01, 0x07, 0x00, 0x03, 0x00, 0x01, 0x00 };
 
 //ハンド
+//Hand
 static const unsigned char g_cursor_hand[] = {
 18,17, 9,9,
 0x00, 0x02, 0x00, 0x20, 0x25, 0x00, 0x50, 0x55, 0x00, 0x50, 0x55, 0x01,
@@ -59,6 +68,7 @@ static const unsigned char g_cursor_hand[] = {
 0xe0, 0x3f, 0x00 };
 
 //ハンドドラッグ時
+//When hand-dragging
 static const unsigned char g_cursor_hand_drag[] = {
 16,16, 8,9,
 0x80, 0x01, 0x70, 0x0e, 0x48, 0x12, 0x48, 0x72, 0x48, 0x92, 0x4e, 0x90,
@@ -69,6 +79,7 @@ static const unsigned char g_cursor_hand_drag[] = {
 0xfe, 0xff, 0xfc, 0x7f, 0xf8, 0x3f, 0xf0, 0x1f };
 
 //回転
+//Rotation
 static const unsigned char g_cursor_rotate[] = {
 24,25, 0,0,
 0x01, 0x00, 0x00, 0x03, 0x00, 0x00, 0x05, 0x00, 0x00, 0x09, 0x00, 0x00,
@@ -87,6 +98,7 @@ static const unsigned char g_cursor_rotate[] = {
 0x00, 0xe1, 0x0f };
 
 //砂時計
+//Hourglass
 static const unsigned char g_cursor_wait[] = {
 10,19, 5,9,
 0xff, 0x03, 0x01, 0x02, 0xff, 0x03, 0x02, 0x01, 0x02, 0x01, 0x02, 0x01,
@@ -99,6 +111,7 @@ static const unsigned char g_cursor_wait[] = {
 0xff, 0x03 };
 
 //アイテムD&D移動
+//Item D&D Move
 static const unsigned char g_cursor_itemmove[] = {
 18,22, 0,0,
 0x01, 0x00, 0x00, 0x03, 0x00, 0x00, 0x05, 0x00, 0x00, 0x09, 0x00, 0x00,
@@ -115,6 +128,7 @@ static const unsigned char g_cursor_itemmove[] = {
 0x80, 0xff, 0x03, 0x80, 0xff, 0x03 };
 
 //移動
+//move
 static const unsigned char g_cursor_move[] = {
 16,22, 0,0,
 0x01,0x00,0x03,0x00,0x05,0x00,0x09,0x00,0x11,0x00,0x21,0x00,0x41,0x00,0x81,0x00,
@@ -126,6 +140,7 @@ static const unsigned char g_cursor_move[] = {
 };
 
 //スポイト
+//Dropper
 static const unsigned char g_cursor_spoit[] = {
 14,14, 1,12,
 0x00, 0x00, 0x00, 0x0c, 0x00, 0x1e, 0x80, 0x1f, 0xc0, 0x0f, 0xc0, 0x07,
@@ -136,6 +151,7 @@ static const unsigned char g_cursor_spoit[] = {
 0x0f, 0x00, 0x02, 0x00 };
 
 //選択
+//select
 static const unsigned char g_cursor_select[] = {
 14,16, 0,0,
 0x01,0x00,0x03,0x00,0x05,0x00,0x09,0x00,0x11,0x00,0x21,0x00,0x41,0x00,0x81,0x00,
@@ -145,6 +161,7 @@ static const unsigned char g_cursor_select[] = {
 };
 
 //範囲移動
+//range transfer
 static const unsigned char g_cursor_selmove[] = {
 15,18, 0,0,
 0x01,0x00,0x03,0x00,0x05,0x00,0x09,0x00,0x11,0x00,0x21,0x00,0x41,0x00,0x81,0x00,
@@ -155,6 +172,7 @@ static const unsigned char g_cursor_selmove[] = {
 };
 
 //スタンプ
+//Stamp
 static const unsigned char g_cursor_stamp[] = {
 13,19, 0,0,
 0x01,0x00,0x03,0x00,0x05,0x00,0x09,0x00,0x11,0x00,0x21,0x00,0x41,0x00,0x81,0x00,
@@ -165,6 +183,7 @@ static const unsigned char g_cursor_stamp[] = {
 };
 
 //テキスト
+//Text
 static const unsigned char g_cursor_text[] = {
 7,16, 3,1,
 0x3e,0x41,0x36,0x14,0x14,0x14,0x14,0x14,0x14,0x14,0x14,0x14,0x14,0x36,0x41,0x3e,
@@ -172,6 +191,7 @@ static const unsigned char g_cursor_text[] = {
 };
 
 //上下ドラッグ拡大縮小
+//drag up/down to zoom in/out
 static const unsigned char g_cursor_zoom_drag[]={
 15,15,0,0,
 0xfc,0x00,0x02,0x01,0x31,0x02,0x79,0x02,0x01,0x02,0x01,0x02,0x79,0x02,0x31,0x02,
@@ -180,6 +200,7 @@ static const unsigned char g_cursor_zoom_drag[]={
 0xfe,0x01,0xfc,0x0e,0x00,0x1e,0x00,0x3e,0x00,0x7c,0x00,0x78,0x00,0x70 };
 
 //リサイズ:左上
+//Resize: top left
 static const unsigned char g_cursor_lefttop[] = {
 15,15, 8,8,
 0xff,0x03,0x01,0x01,0x81,0x00,0x41,0x00,0x81,0x00,0x01,0x41,0x09,0x62,0x15,0x54,
@@ -189,6 +210,7 @@ static const unsigned char g_cursor_lefttop[] = {
 };
 
 //リサイズ:右上
+//Resize: top right
 static const unsigned char g_cursor_righttop[] = {
 15,15, 8,8,
 0xe0,0x7f,0x40,0x40,0x80,0x40,0x00,0x41,0x80,0x40,0x41,0x40,0x23,0x48,0x15,0x54,
@@ -198,6 +220,7 @@ static const unsigned char g_cursor_righttop[] = {
 };
 
 //リサイズ:水平
+//Resize: horizontal
 static const unsigned char g_cursor_resizehorz[] = {
 19,13, 10,7,
 0x40,0x10,0x00,0x60,0x30,0x00,0x50,0x50,0x00,0x48,0x90,0x00,0xc4,0x1f,0x01,0x02,
@@ -208,6 +231,7 @@ static const unsigned char g_cursor_resizehorz[] = {
 };
 
 //リサイズ:垂直
+//Resize: Vertical
 static const unsigned char g_cursor_resizevert[] = {
 13,19, 7,10,
 0x40,0x00,0xa0,0x00,0x10,0x01,0x08,0x02,0x04,0x04,0x02,0x08,0x1f,0x1f,0x10,0x01,
@@ -238,6 +262,7 @@ static const unsigned char *g_cursor_imgdat[] = {
 };
 
 /* slot : [0] 描画用矢印 [1] 砂時計 [2] キャンバス用 [3] ドラッグ用 [4] ダイアログ用 */
+/* slot : [0] arrow for drawing [1] hourglass [2] for canvas [3] for drag [4] for dialog */
 
 static mCursor g_slot_cursor[SLOT_NUM] = { 0,0,0,0,0 };
 static int g_slot_no[SLOT_NUM] = { APP_CURSOR_DRAW, APP_CURSOR_WAIT, -1, -1, -1 };
@@ -248,18 +273,22 @@ static int g_slot_no[SLOT_NUM] = { APP_CURSOR_DRAW, APP_CURSOR_WAIT, -1, -1, -1 
 
 
 /** 番号からカーソル取得 */
+/** Get cursor from number */
 
 static mCursor _get_cursor_slot(int slot,int cursorno)
 {
 	if(g_slot_no[slot] == cursorno)
 		//現在のスロットに同じカーソルがある場合
+		//If the same cursor is in the current slot
 		return g_slot_cursor[slot];
 	else if(cursorno < 2)
 		//固定カーソルの場合
+		//For fixed cursor
 		return g_slot_cursor[cursorno];
 	else
 	{
 		//スロットのカーソルを入れ替え
+		//Replace the cursor in the slot
 		
 		mCursorFree(g_slot_cursor[slot]);
 
@@ -272,6 +301,7 @@ static mCursor _get_cursor_slot(int slot,int cursorno)
 
 
 /** 初期化 */
+/** Initialize */
 
 void AppCursor_init(uint8_t *drawcursor)
 {
@@ -280,6 +310,7 @@ void AppCursor_init(uint8_t *drawcursor)
 }
 
 /** 終了時の解放 */
+/** Release on exit */
 
 void AppCursor_free()
 {
@@ -292,6 +323,9 @@ void AppCursor_free()
 /** 描画用カーソルを変更
  *
  * @param buf NULL でデフォルト */
+/** Change cursor for drawing
+ *
+ * default with @param buf NULL */
 
 void AppCursor_setDrawCursor(uint8_t *buf)
 {
@@ -301,6 +335,7 @@ void AppCursor_setDrawCursor(uint8_t *buf)
 }
 
 /** 砂時計カーソル取得 */
+/** get hourglass cursor */
 
 mCursor AppCursor_getWaitCursor()
 {
@@ -308,6 +343,7 @@ mCursor AppCursor_getWaitCursor()
 }
 
 /** キャンバス用のカーソル取得 */
+/** Get cursor for canvas */
 
 mCursor AppCursor_getForCanvas(int no)
 {
@@ -315,6 +351,7 @@ mCursor AppCursor_getForCanvas(int no)
 }
 
 /** ドラッグ中用のカーソル取得 */
+/** get cursor for dragging */
 
 mCursor AppCursor_getForDrag(int no)
 {
@@ -322,6 +359,7 @@ mCursor AppCursor_getForDrag(int no)
 }
 
 /** ダイアログ用のカーソル取得 */
+/** Get cursor for dialog */
 
 mCursor AppCursor_getForDialog(int no)
 {

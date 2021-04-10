@@ -18,7 +18,8 @@
 $*/
 
 /*************************************
- * 設定ファイルの読み書き
+ * /* 設定ファイルの読み書き */
+ * /* read/write configuration files */
  *************************************/
 
 #include <stdlib.h>
@@ -52,6 +53,7 @@ $*/
 #define _INIT_VAL        -100000
 
 //パネル名
+//Panel name
 
 static const char *g_dock_name[] = {
 	"tool", "option", "layer", "brush", "color", "colpal",
@@ -64,28 +66,34 @@ static const char *g_dock_name[] = {
 
 /********************************
  * 読み込み
+ * Read
  ********************************/
 
 
 /** 読み込み前の初期化 */
+/** Initialization before loading */
 
 static void _load_init_data(ConfigData *cf,DrawData *pdw)
 {
 	int i;
 
 	/* [!] 確保時にゼロクリアはされている */
+	/* [!] Zero-clearing is done at the time of allocation */
 
 	//中間色、左右の色
+	//middle colour, left/right colour
 
 	for(i = 0; i < COLPAL_GRADNUM; i++)
 		pdw->col.gradcol[i][1] = 0xffffff;
 
 	//グリッド登録リスト
+	//Grid Registration List
 
 	for(i = 0; i < CONFIG_GRIDREG_NUM; i++)
 		cf->grid.reglist[i] = (100 << 16) | 100;
 
 	//水彩プリセット
+	//Watercolour presets
 
 	ConfigData_waterPreset_default();
 
@@ -94,6 +102,11 @@ static void _load_init_data(ConfigData *cf,DrawData *pdw)
 	 * 右ボタン:スポイト
 	 * ホイール上:一段階拡大
 	 * ホイール下:一段階縮小 */
+	//button operation
+	/* Middle button: Move canvas
+	 * Right button: eyedropper
+	 * wheel up: zoom in one step
+	 * wheel down: one step down */
 
 	cf->default_btt_cmd[2] = CANVASKEYID_OP_TOOL + TOOL_CANVAS_MOVE;
 	cf->default_btt_cmd[3] = CANVASKEYID_OP_TOOL + TOOL_SPOIT;
@@ -104,6 +117,10 @@ static void _load_init_data(ConfigData *cf,DrawData *pdw)
 /** 新規作成サイズ (履歴/登録)
  *
  * カンマで区切った４つのデータ ("単位, DPI, 幅, 高さ") */
+
+/** Create new size (history/registration)
+ *
+ * 4 comma-separated data ("units, DPI, width, height") */
 
 static void _load_imagesize(mIniRead *ini,ImageSizeData *dat)
 {
@@ -128,6 +145,7 @@ static void _load_imagesize(mIniRead *ini,ImageSizeData *dat)
 }
 
 /** 定規記録データ読み込み */
+/** read ruler record data */
 
 static void _load_draw_rule_record(mIniRead *ini)
 {
@@ -146,12 +164,14 @@ static void _load_draw_rule_record(mIniRead *ini)
 		rec = APP_DRAW->rule.record + no;
 	
 		//タイプ
+		//Type
 
 		rec->type = strtoul(param, &end, 10);
 
 		if(rec->type == 0 || !(*end)) continue;
 
 		//値
+		//value
 
 		for(i = 0; i < 4; i++)
 		{
@@ -162,6 +182,7 @@ static void _load_draw_rule_record(mIniRead *ini)
 }
 
 /** パネル配置値を正規化 */
+/** normalize panel placement values */
 
 static void _normalize_panel_layout(ConfigData *cf)
 {
@@ -170,11 +191,13 @@ static void _normalize_panel_layout(ConfigData *cf)
 	int i,no,pos;
 
 	//----- ペイン
+	//----- pane
 
 	for(i = 0; i < 4; i++)
 		buf[i] = -1;
 
 	//各ペインの位置
+	//The position of each pane
 
 	for(pc = cf->pane_layout, pos = 0; *pc; pc++)
 	{
@@ -184,6 +207,7 @@ static void _normalize_panel_layout(ConfigData *cf)
 	}
 
 	//記述されていないもの
+	//those not described
 
 	for(i = 0; i < 4; i++)
 	{
@@ -192,6 +216,7 @@ static void _normalize_panel_layout(ConfigData *cf)
 	}
 
 	//再セット
+	//Reset
 
 	pc = cf->pane_layout;
 
@@ -205,11 +230,13 @@ static void _normalize_panel_layout(ConfigData *cf)
 	*pc = 0;
 
 	//------ パネル
-
+	//------ panel
+	
 	DockObject_normalize_layout_config();
 }
 
 /** ウィジェット状態読み込み */
+/** widget state read */
 
 static void _load_widgets_state(mIniRead *ini,ConfigData *cf,mDockWidgetState *dock_state)
 {
@@ -221,6 +248,7 @@ static void _load_widgets_state(mIniRead *ini,ConfigData *cf,mDockWidgetState *d
 	mIniReadSetGroup(ini, "widgets");
 
 	//メインウィンドウ
+	//main window
 
 	mIniReadBox(ini, "mainwin", &cf->box_mainwin, _INIT_VAL, _INIT_VAL, _INIT_VAL, _INIT_VAL);
 
@@ -229,6 +257,7 @@ static void _load_widgets_state(mIniRead *ini,ConfigData *cf,mDockWidgetState *d
 	cf->dockbrush_height[1] = mIniReadInt(ini, "brush_listh", 100);
 
 	//ペイン幅
+	//Pane width
 
 	for(i = 0; i < 3; i++)
 		cf->pane_width[i] = 230;
@@ -236,6 +265,7 @@ static void _load_widgets_state(mIniRead *ini,ConfigData *cf,mDockWidgetState *d
 	mIniReadNums(ini, "pane_width", cf->pane_width, 3, 2, FALSE);
 
 	//配置
+	//placement
 
 	mIniReadTextBuf(ini, "pane_layout", cf->pane_layout, 5, "1023");
 	mIniReadTextBuf(ini, "dock_layout", cf->dock_layout, 16, "tol:ivrb:cwpf");
@@ -243,6 +273,7 @@ static void _load_widgets_state(mIniRead *ini,ConfigData *cf,mDockWidgetState *d
 	_normalize_panel_layout(cf);
 
 	//ダイアログ
+	//Dialog
 
 	mIniReadBox(ini, "textdlg", &cf->box_textdlg, 0, 0, 0, 0);
 	mIniReadSize(ini, "boxeditdlg", &cf->size_boxeditdlg, 0, 0);
@@ -268,6 +299,8 @@ static void _load_widgets_state(mIniRead *ini,ConfigData *cf,mDockWidgetState *d
 		{
 			//デフォルト
 			/* イメージビューア、フィルタ一覧は閉じる */
+			//default
+			/* Image viewer and filter list are closed */
 
 			pbox->x = pbox->y = 0;
 			pbox->w = pbox->h = 250;
@@ -282,6 +315,7 @@ static void _load_widgets_state(mIniRead *ini,ConfigData *cf,mDockWidgetState *d
 }
 
 /** ConfigData 読み込み */
+/** ConfigData read */
 
 static void _load_configdata(mIniRead *ini,ConfigData *cf)
 {
@@ -289,6 +323,7 @@ static void _load_configdata(mIniRead *ini,ConfigData *cf)
 	uint32_t u32;
 
 	//----- 環境
+	//----- environment
 
 	mIniReadSetGroup(ini, "env");
 
@@ -332,7 +367,8 @@ static void _load_configdata(mIniRead *ini,ConfigData *cf)
 			*(cf->toolbar_btts + cf->toolbar_btts_size - 1) = 255;
 	}
 
-	//----- dock 関連
+	//----- dock 関連	
+	//----- dock Related
 
 	mIniReadSetGroup(ini, "dock");
 
@@ -345,6 +381,7 @@ static void _load_configdata(mIniRead *ini,ConfigData *cf)
 	mIniReadNums(ini, "water_preset", cf->water_preset, CONFIG_WATER_PRESET_NUM, 4, TRUE);
 
 	//----- キャンバスビュー
+	//----- canvas-view
 
 	mIniReadSetGroup(ini, "canvasview");
 
@@ -353,6 +390,8 @@ static void _load_configdata(mIniRead *ini,ConfigData *cf)
 	cf->canvasview_zoom_loupe = mIniReadInt(ini, "zoom_loupe", 600);
 
 	//ボタン
+	//button
+
 
 	cf->canvasview_btt[0] = 1;
 	cf->canvasview_btt[2] = 2;
@@ -360,6 +399,7 @@ static void _load_configdata(mIniRead *ini,ConfigData *cf)
 	mIniReadNums(ini, "btt", cf->canvasview_btt, 5, 1, FALSE);
 
 	//----- イメージビューア
+	//----- image viewer
 
 	mIniReadSetGroup(ini, "imageviewer");
 
@@ -368,6 +408,7 @@ static void _load_configdata(mIniRead *ini,ConfigData *cf)
 	cf->imageviewer_flags = mIniReadInt(ini, "flags", CONFIG_IMAGEVIEWER_F_FIT);
 
 	//ボタン
+	//button
 
 	cf->imageviewer_btt[1] = 1;
 	cf->imageviewer_btt[2] = 2;
@@ -376,10 +417,12 @@ static void _load_configdata(mIniRead *ini,ConfigData *cf)
 	mIniReadNums(ini, "btt", cf->imageviewer_btt, 5, 1, FALSE);
 
 	//フラグ、左右反転は起動時常にOFF
+	//flag, left/right flip always off at startup
 
 	cf->imageviewer_flags &= ~CONFIG_IMAGEVIEWER_F_MIRROR;
 
 	//----- グリッド
+	//----- Grid
 
 	mIniReadSetGroup(ini, "grid");
 
@@ -394,6 +437,7 @@ static void _load_configdata(mIniRead *ini,ConfigData *cf)
 	mIniReadNums(ini, "reg", cf->grid.reglist, CONFIG_GRIDREG_NUM, 4, TRUE);
 
 	//----- 保存設定
+	//----- Save Settings
 
 	mIniReadSetGroup(ini, "save");
 
@@ -404,6 +448,7 @@ static void _load_configdata(mIniRead *ini,ConfigData *cf)
 	cf->save.psd_type = mIniReadInt(ini, "psd_type", 0);
 
 	//----- 操作設定
+	//----- Operation Settings
 
 	mIniReadSetGroup(ini, "button");
 
@@ -411,6 +456,7 @@ static void _load_configdata(mIniRead *ini,ConfigData *cf)
 	mIniReadNums(ini, "pentab", cf->pentab_btt_cmd, CONFIG_POINTERBTT_NUM, 1, FALSE);
 
 	//----- 文字列
+	//----- text column
 
 	mIniReadSetGroup(ini, "string");
 
@@ -431,6 +477,7 @@ static void _load_configdata(mIniRead *ini,ConfigData *cf)
 	ConfigData_setTempDir_default();
 
 	//素材ディレクトリが空の場合は設定ディレクトリ下
+	//Under the configuration directory if the material directory is empty
 
 	if(mStrIsEmpty(&cf->strUserTextureDir))
 		mAppGetConfigPath(&cf->strUserTextureDir, "texture");
@@ -439,21 +486,25 @@ static void _load_configdata(mIniRead *ini,ConfigData *cf)
 		mAppGetConfigPath(&cf->strUserBrushDir, "brush");
 
 	//------ ファイル履歴
+	//------ File History
 
 	mIniReadSetGroup(ini, "recentfile");
 	mIniReadNoStrs(ini, 0, cf->strRecentFile, CONFIG_RECENTFILE_NUM);
 
 	//------ 開いたディレクトリ履歴
+	//------ history of opened directories
 
 	mIniReadSetGroup(ini, "recent_opendir");
 	mIniReadNoStrs(ini, 0, cf->strRecentOpenDir, CONFIG_RECENTDIR_NUM);
 
 	//------ 保存ディレクトリ履歴
+	//------ save directory history
 
 	mIniReadSetGroup(ini, "recent_savedir");
 	mIniReadNoStrs(ini, 0, cf->strRecentSaveDir, CONFIG_RECENTDIR_NUM);
 
 	//----- 新規作成サイズ
+	//----- new create size
 
 	mIniReadSetGroup(ini, "newimg_recent");
 	_load_imagesize(ini, cf->imgsize_recent);
@@ -462,6 +513,7 @@ static void _load_configdata(mIniRead *ini,ConfigData *cf)
 	_load_imagesize(ini, cf->imgsize_record);
 
 	//----- キャンバスキー
+	//----- Canvas Key
 
 	if(mIniReadSetGroup(ini, "canvaskey"))
 	{
@@ -470,11 +522,13 @@ static void _load_configdata(mIniRead *ini,ConfigData *cf)
 	}
 
 	//----- フィルタデータ
+	//----- filter data
 
 	FilterSaveData_getConfig(ini);
 }
 
 /** DrawData 読み込み */
+/** DrawData read */
 
 static void _load_drawdata(mIniRead *ini,DrawData *p)
 {
@@ -487,6 +541,7 @@ static void _load_drawdata(mIniRead *ini,DrawData *p)
 	mIniReadStr(ini, "opttex", &p->strOptTexPath, NULL);
 
 	//------- カラー
+	//------- colours
 
 	mIniReadSetGroup(ini, "draw_color");
 
@@ -508,7 +563,8 @@ static void _load_drawdata(mIniRead *ini,DrawData *p)
 
 	mIniReadNums(ini, "layercolpal", p->col.layercolpal, LAYERCOLPAL_NUM, 4, TRUE);
 
-	//------- ツール
+	//------- ツール	
+	//------- Tools
 
 	mIniReadSetGroup(ini, "draw_tool");
 
@@ -524,6 +580,7 @@ static void _load_drawdata(mIniRead *ini,DrawData *p)
 	p->tool.opt_magicwand = mIniReadInt(ini, "opt_magicwand", MAGICWAND_OPT_DEFAULT);
 
 	//-------- 入り抜き
+	//-------- in and out
 
 	mIniReadSetGroup(ini, "headtail");
 
@@ -534,6 +591,7 @@ static void _load_drawdata(mIniRead *ini,DrawData *p)
 	mIniReadNums(ini, "record", p->headtail.record, HEADTAIL_RECORD_NUM, 4, TRUE);
 
 	//------- テキスト描画
+	//------- text drawing
 
 	mIniReadSetGroup(ini, "drawtext");
 
@@ -550,6 +608,7 @@ static void _load_drawdata(mIniRead *ini,DrawData *p)
 	p->drawtext.flags = mIniReadInt(ini, "flags", DRAW_DRAWTEXT_F_PREVIEW | DRAW_DRAWTEXT_F_ANTIALIAS);
 
 	//定規
+	//Ruler
 
 	_load_draw_rule_record(ini);
 }
@@ -557,6 +616,9 @@ static void _load_drawdata(mIniRead *ini,DrawData *p)
 /** 設定ファイル読み込み
  *
  * @return 0:失敗 1:ファイルが存在 2:初期状態 */
+/** Read configuration file
+ *
+ * @return 0:failure 1:file exists 2:initial state */
 
 int appLoadConfig(mDockWidgetState *dock_state)
 {
@@ -567,6 +629,7 @@ int appLoadConfig(mDockWidgetState *dock_state)
 	if(!ini) return FALSE;
 
 	//バージョン
+	//version
 
 	mIniReadSetGroup(ini, "azpainter");
 
@@ -585,10 +648,12 @@ int appLoadConfig(mDockWidgetState *dock_state)
 	mIniReadFileDialogConfig(ini, "filedialog", MAPP->filedialog_config);
 
 	//読み込み前の初期化
+	//Initialization before loading
 
 	_load_init_data(APP_CONF, APP_DRAW);
 
 	//ウィジェット状態
+	//Widget status
 
 	_load_widgets_state(ini, APP_CONF, dock_state);
 
@@ -608,10 +673,12 @@ int appLoadConfig(mDockWidgetState *dock_state)
 
 /********************************
  * 書き込み
+ * Write to
  ********************************/
 
 
 /** 新規作成サイズ */
+/** create new size */
 
 static void _save_imagesize(FILE *fp,ImageSizeData *dat)
 {
@@ -633,6 +700,7 @@ static void _save_imagesize(FILE *fp,ImageSizeData *dat)
 }
 
 /** 定規記録データ 書き込み */
+/** ruler record data write */
 
 static void _save_draw_rule_record(FILE *fp)
 {
@@ -652,6 +720,7 @@ static void _save_draw_rule_record(FILE *fp)
 }
 
 /** ウィジェット状態 */
+/** widget state */
 
 static void _save_widgets_state(FILE *fp,ConfigData *cf)
 {
@@ -663,6 +732,7 @@ static void _save_widgets_state(FILE *fp,ConfigData *cf)
 	mIniWriteGroup(fp, "widgets");
 
 	//メインウィンドウ
+	//main window
 
 	mWindowGetSaveBox(M_WINDOW(wg->mainwin), &cf->box_mainwin);
 
@@ -672,6 +742,7 @@ static void _save_widgets_state(FILE *fp,ConfigData *cf)
 	mIniWriteInt(fp, "brush_listh", cf->dockbrush_height[1]);
 
 	//ペイン幅
+	//Pane width
 
 	for(i = 0; i < 3; i++)
 		cf->pane_width[i] = wg->pane[i]->w;
@@ -679,11 +750,13 @@ static void _save_widgets_state(FILE *fp,ConfigData *cf)
 	mIniWriteNums(fp, "pane_width", cf->pane_width, 3, 2, FALSE);
 
 	//配置
+	//placement
 
 	mIniWriteText(fp, "pane_layout", cf->pane_layout);
 	mIniWriteText(fp, "dock_layout", cf->dock_layout);
 
 	//ダイアログ
+	//Dialog
 
 	mIniWriteBox(fp, "textdlg", &cf->box_textdlg);
 	mIniWriteSize(fp, "boxeditdlg", &cf->size_boxeditdlg);
@@ -754,6 +827,7 @@ static void _save_configdata(FILE *fp,ConfigData *cf)
 		mIniWriteNums(fp, "toolbar_btts", cf->toolbar_btts, cf->toolbar_btts_size - 1, 1, FALSE);
 
 	//----- dock 関連
+	//----- dock related
 
 	mIniWriteGroup(fp, "dock");
 
@@ -766,6 +840,7 @@ static void _save_configdata(FILE *fp,ConfigData *cf)
 	mIniWriteNums(fp, "water_preset", cf->water_preset, CONFIG_WATER_PRESET_NUM, 4, TRUE);
 
 	//----- キャンバスビュー
+	//----- canvas-view
 
 	mIniWriteGroup(fp, "canvasview");
 
@@ -775,6 +850,7 @@ static void _save_configdata(FILE *fp,ConfigData *cf)
 	mIniWriteNums(fp, "btt", cf->canvasview_btt, 5, 1, FALSE);
 
 	//----- イメージビューア
+	//----- image viewer
 
 	mIniWriteGroup(fp, "imageviewer");
 
@@ -783,6 +859,7 @@ static void _save_configdata(FILE *fp,ConfigData *cf)
 	mIniWriteNums(fp, "btt", cf->imageviewer_btt, 5, 1, FALSE);
 
 	//----- グリッド
+	//----- Grid
 
 	mIniWriteGroup(fp, "grid");
 
@@ -797,6 +874,7 @@ static void _save_configdata(FILE *fp,ConfigData *cf)
 	mIniWriteNums(fp, "reg", cf->grid.reglist, CONFIG_GRIDREG_NUM, 4, TRUE);
 
 	//----- 保存設定
+	//----- Save Settings
 
 	mIniWriteGroup(fp, "save");
 
@@ -807,6 +885,7 @@ static void _save_configdata(FILE *fp,ConfigData *cf)
 	mIniWriteInt(fp, "psd_type", cf->save.psd_type);
 
 	//----- 操作
+	//----- operations
 
 	mIniWriteGroup(fp, "button");
 
@@ -814,6 +893,7 @@ static void _save_configdata(FILE *fp,ConfigData *cf)
 	mIniWriteNums(fp, "pentab", cf->pentab_btt_cmd, CONFIG_POINTERBTT_NUM, 1, FALSE);
 
 	//----- 文字列
+	//----- text column
 
 	mIniWriteGroup(fp, "string");
 
@@ -832,21 +912,25 @@ static void _save_configdata(FILE *fp,ConfigData *cf)
 	mIniWriteStr(fp, "theme", &cf->strThemeFile);
 
 	//----- ファイル履歴
+	//----- File History
 
 	mIniWriteGroup(fp, "recentfile");
 	mIniWriteNoStrs(fp, 0, cf->strRecentFile, CONFIG_RECENTFILE_NUM);
 
 	//----- 開いたディレクトリ履歴
+	//----- history of opened directories
 
 	mIniWriteGroup(fp, "recent_opendir");
 	mIniWriteNoStrs(fp, 0, cf->strRecentOpenDir, CONFIG_RECENTDIR_NUM);
 
 	//----- 保存ディレクトリ履歴
+	//----- save directory history
 
 	mIniWriteGroup(fp, "recent_savedir");
 	mIniWriteNoStrs(fp, 0, cf->strRecentSaveDir, CONFIG_RECENTDIR_NUM);
 
 	//----- 新規作成サイズ
+	//----- New size created
 
 	mIniWriteGroup(fp, "newimg_recent");
 	_save_imagesize(fp, cf->imgsize_recent);
@@ -855,6 +939,7 @@ static void _save_configdata(FILE *fp,ConfigData *cf)
 	_save_imagesize(fp, cf->imgsize_record);
 
 	//----- キャンバスキー
+	//----- Canvas Key
 
 	mIniWriteGroup(fp, "canvaskey");
 
@@ -864,12 +949,15 @@ static void _save_configdata(FILE *fp,ConfigData *cf)
 			mIniWriteNoInt(fp, i, cf->canvaskey[i]);
 	}
 
-	//----- フィルタデータ
+	//----- フィルタデータ	
+	//----- filter data
+
 
 	FilterSaveData_setConfig(fp);
 }
 
 /** DrawData 書き込み */
+/** DrawData write */
 
 static void _save_drawdata(FILE *fp,DrawData *p)
 {
@@ -880,6 +968,7 @@ static void _save_drawdata(FILE *fp,DrawData *p)
 	mIniWriteStr(fp, "opttex", &p->strOptTexPath);
 
 	//------ カラー
+	//------ colours
 
 	mIniWriteGroup(fp, "draw_color");
 
@@ -894,6 +983,8 @@ static void _save_drawdata(FILE *fp,DrawData *p)
 	mIniWriteNums(fp, "layercolpal", p->col.layercolpal, LAYERCOLPAL_NUM, 4, TRUE);
 
 	//------- ツール
+	//------- Tools
+
 
 	mIniWriteGroup(fp, "draw_tool");
 
@@ -919,6 +1010,7 @@ static void _save_drawdata(FILE *fp,DrawData *p)
 	mIniWriteNums(fp, "record", p->headtail.record, HEADTAIL_RECORD_NUM, 4, TRUE);
 
 	//------- テキスト描画
+	//------- text drawing
 
 	mIniWriteGroup(fp, "drawtext");
 
@@ -934,11 +1026,13 @@ static void _save_drawdata(FILE *fp,DrawData *p)
 	mIniWriteInt(fp, "flags", p->drawtext.flags);
 
 	//定規
+	//Ruler
 
 	_save_draw_rule_record(fp);
 }
 
 /** 設定ファイル書き込み (メイン) */
+/** Write configuration file (main) */
 
 void appSaveConfig()
 {
@@ -948,6 +1042,7 @@ void appSaveConfig()
 	if(!fp) return;
 
 	//バージョン
+	//version
 
 	mIniWriteGroup(fp, "azpainter");
 	mIniWriteInt(fp, "ver", 2);
@@ -959,6 +1054,8 @@ void appSaveConfig()
 	mIniWriteFileDialogConfig(fp, "filedialog", MAPP->filedialog_config);
 
 	//ウィジェット状態
+	//Widget status
+
 
 	_save_widgets_state(fp, APP_CONF);
 
