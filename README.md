@@ -1,6 +1,8 @@
 # AzPainter
 
-http://azsky2.html.xdomain.jp/
+https://gitlab.com/azelpg/azpainter
+
+(http://azsky2.html.xdomain.jp/)
 
 Linux 用のイラスト向けペイントソフト。
 Paint software for illustration on Linux.
